@@ -1,0 +1,65 @@
+package bucket
+
+import (
+	"errors"
+	"fmt"
+	"os"
+
+	"github.com/ak/loadout/internal/detector"
+	"github.com/ak/loadout/internal/diff"
+	"github.com/ak/loadout/internal/state"
+	"github.com/spf13/cobra"
+)
+
+var diffCmd = &cobra.Command{
+	Use:   "diff",
+	Short: "Compare saved state against currently installed packages",
+	RunE:  runDiff,
+}
+
+func init() {
+	rootCmd.AddCommand(diffCmd)
+}
+
+func runDiff(cmd *cobra.Command, _ []string) error {
+	saved, err := state.Read(stateFile)
+	if err != nil {
+		return fmt.Errorf("reading state file: %w", err)
+	}
+
+	detectors := detector.All()
+	current := state.New()
+
+	for _, d := range detectors {
+		pkgs, err := d.Detect()
+		if errors.Is(err, detector.ErrNotAvailable) {
+			continue
+		}
+		if err != nil {
+			if verbose {
+				fmt.Fprintf(os.Stderr, "%s: error: %v\n", d.Name(), err)
+			}
+			continue
+		}
+		names := make([]string, len(pkgs))
+		for i, p := range pkgs {
+			names[i] = p.Name
+		}
+		current.Sources[d.Name()] = state.SourceState{Packages: names}
+	}
+
+	diffs := diff.Compute(saved, current)
+	diff.Render(diffs, cmd.OutOrStdout())
+
+	hasDiff := false
+	for _, d := range diffs {
+		if len(d.Added)+len(d.Removed) > 0 {
+			hasDiff = true
+			break
+		}
+	}
+	if hasDiff {
+		os.Exit(1)
+	}
+	return nil
+}
