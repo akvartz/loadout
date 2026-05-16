@@ -7,6 +7,7 @@ import (
 
 	"github.com/akvartz/loadout/internal/detector"
 	"github.com/akvartz/loadout/internal/diff"
+	"github.com/akvartz/loadout/internal/plugin"
 	"github.com/akvartz/loadout/internal/state"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +28,17 @@ func runDiff(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("reading state file: %w", err)
 	}
 
-	detectors := detector.All()
+	cfg, err := loadConfig()
+	if err != nil {
+		return fmt.Errorf("loading config: %w", err)
+	}
+	mgr, err := plugin.New(cfg)
+	if err != nil {
+		return fmt.Errorf("loading plugins: %w", err)
+	}
+	defer mgr.Close() //nolint:errcheck
+
+	detectors := append(detector.All(), bridgeDetectors(mgr.Detectors())...)
 	current := state.New()
 
 	for _, d := range detectors {
@@ -51,15 +62,10 @@ func runDiff(cmd *cobra.Command, _ []string) error {
 	diffs := diff.Compute(saved, current)
 	diff.Render(diffs, cmd.OutOrStdout())
 
-	hasDiff := false
 	for _, d := range diffs {
 		if len(d.Added)+len(d.Removed) > 0 {
-			hasDiff = true
-			break
+			os.Exit(1)
 		}
-	}
-	if hasDiff {
-		os.Exit(1)
 	}
 	return nil
 }
