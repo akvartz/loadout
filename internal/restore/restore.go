@@ -1,6 +1,6 @@
 package restore
 
-import "github.com/ak/loadout/internal/state"
+import "github.com/akvartz/loadout/internal/state"
 
 type Generator interface {
 	Name() string

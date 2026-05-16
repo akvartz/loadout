@@ -1,12 +1,12 @@
-package bucket
+package loadout
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
 
-	"github.com/ak/loadout/internal/restore"
-	"github.com/ak/loadout/internal/state"
+	"github.com/akvartz/loadout/internal/restore"
+	"github.com/akvartz/loadout/internal/state"
 	"github.com/spf13/cobra"
 )
 

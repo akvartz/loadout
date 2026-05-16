@@ -1,4 +1,4 @@
-module github.com/ak/loadout
+module github.com/akvartz/loadout
 
 go 1.24.3
 

@@ -1,7 +1,7 @@
 package main
 
-import "github.com/ak/loadout/cmd/bucket"
+import "github.com/akvartz/loadout/cmd/loadout"
 
 func main() {
-	bucket.Execute()
+	loadout.Execute()
 }

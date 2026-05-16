@@ -1,12 +1,12 @@
-package bucket
+package loadout
 
 import (
 	"errors"
 	"fmt"
 	"os"
 
-	"github.com/ak/loadout/internal/detector"
-	"github.com/ak/loadout/internal/state"
+	"github.com/akvartz/loadout/internal/detector"
+	"github.com/akvartz/loadout/internal/state"
 	"github.com/spf13/cobra"
 )
 

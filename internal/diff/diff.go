@@ -5,7 +5,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/ak/loadout/internal/state"
+	"github.com/akvartz/loadout/internal/state"
 )
 
 type SourceDiff struct {

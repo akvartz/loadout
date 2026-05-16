@@ -1,4 +1,4 @@
-package bucket
+package loadout
 
 import (
 	"fmt"

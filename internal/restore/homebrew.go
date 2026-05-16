@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ak/loadout/internal/state"
+	"github.com/akvartz/loadout/internal/state"
 )
 
 type Brewfile struct{}
