@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/akvartz/loadout/internal/detector"
+	"github.com/akvartz/loadout/internal/plugin"
 	"github.com/akvartz/loadout/internal/state"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +22,17 @@ func init() {
 }
 
 func runSnapshot(cmd *cobra.Command, _ []string) error {
-	detectors := detector.All()
+	cfg, err := loadConfig()
+	if err != nil {
+		return fmt.Errorf("loading config: %w", err)
+	}
+	mgr, err := plugin.New(cfg)
+	if err != nil {
+		return fmt.Errorf("loading plugins: %w", err)
+	}
+	defer mgr.Close() //nolint:errcheck
+
+	detectors := append(detector.All(), bridgeDetectors(mgr.Detectors())...)
 	s := state.New()
 
 	for _, d := range detectors {
@@ -53,5 +64,13 @@ func runSnapshot(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("writing state: %w", err)
 	}
 	fmt.Fprintf(cmd.OutOrStdout(), "saved to %s\n", stateFile)
+
+	// Run post-snapshot hooks. Errors are non-fatal.
+	for _, h := range mgr.Hooks() {
+		if err := h.PostSnapshot(s, stateFile); err != nil {
+			fmt.Fprintf(os.Stderr, "hook %s: PostSnapshot: %v\n", h.Name(), err)
+		}
+	}
+
 	return nil
 }

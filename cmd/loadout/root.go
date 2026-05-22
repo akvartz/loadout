@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/akvartz/loadout/internal/config"
 	"github.com/spf13/cobra"
 )
 
 var (
-	stateFile string
-	verbose   bool
+	stateFile  string
+	verbose    bool
+	configFile string
 )
 
 var rootCmd = &cobra.Command{
@@ -27,4 +29,14 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&stateFile, "file", "f", "loadout.toml", "state file path")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "plugin config file (default: ~/.config/loadout/config.toml)")
+}
+
+// loadConfig reads the plugin config, resolving the path from --config or the default.
+func loadConfig() (config.Config, error) {
+	path := configFile
+	if path == "" {
+		path = config.DefaultPath()
+	}
+	return config.Load(path)
 }
