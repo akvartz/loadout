@@ -1,0 +1,252 @@
+# Built-in cross-manager package name translations.
+#
+# Each entry maps one logical package to its name in every manager that ships
+# it. Supported manager keys: apt, brew, brew-cask, nix, snap, flatpak, pip,
+# cargo, npm. A missing key means "no known equivalent"; an explicit "" means
+# "known to be unavailable". brew names are formulas; brew-cask names are casks.
+#
+# Users can extend or override this table with their own file via the
+# converter plugin's "table" setting (same format).
+
+[packages]
+
+# --- modern CLI replacements ---
+bat = { apt = "bat", brew = "bat", nix = "bat", cargo = "bat" }
+bottom = { brew = "bottom", nix = "bottom", cargo = "bottom" }
+broot = { brew = "broot", nix = "broot", cargo = "broot" }
+duf = { brew = "duf", nix = "duf" }
+dust = { brew = "dust", nix = "du-dust", cargo = "du-dust" }
+exa = { apt = "exa", brew = "eza", nix = "eza", cargo = "eza" }
+eza = { brew = "eza", nix = "eza", cargo = "eza" }
+fd = { apt = "fd-find", brew = "fd", nix = "fd", cargo = "fd-find" }
+fzf = { apt = "fzf", brew = "fzf", nix = "fzf" }
+hyperfine = { apt = "hyperfine", brew = "hyperfine", nix = "hyperfine", cargo = "hyperfine" }
+jq = { apt = "jq", brew = "jq", nix = "jq", snap = "jq" }
+gron = { apt = "gron", brew = "gron", nix = "gron" }
+procs = { brew = "procs", nix = "procs", cargo = "procs" }
+ripgrep = { apt = "ripgrep", brew = "ripgrep", nix = "ripgrep", cargo = "ripgrep" }
+sd = { brew = "sd", nix = "sd", cargo = "sd" }
+silver-searcher = { apt = "silversearcher-ag", brew = "the_silver_searcher", nix = "silver-searcher" }
+tokei = { brew = "tokei", nix = "tokei", cargo = "tokei" }
+xh = { brew = "xh", nix = "xh", cargo = "xh" }
+zoxide = { brew = "zoxide", nix = "zoxide", cargo = "zoxide" }
+
+# --- system monitoring ---
+btop = { apt = "btop", brew = "btop", nix = "btop" }
+glances = { apt = "glances", brew = "glances", nix = "glances", pip = "glances" }
+htop = { apt = "htop", brew = "htop", nix = "htop", snap = "htop" }
+iftop = { apt = "iftop", brew = "iftop", nix = "iftop" }
+ncdu = { apt = "ncdu", brew = "ncdu", nix = "ncdu" }
+neofetch = { apt = "neofetch", brew = "neofetch", nix = "neofetch" }
+fastfetch = { brew = "fastfetch", nix = "fastfetch" }
+
+# --- terminal & shell ---
+alacritty = { apt = "alacritty", nix = "alacritty", cargo = "alacritty", brew-cask = "alacritty" }
+direnv = { apt = "direnv", brew = "direnv", nix = "direnv" }
+fish = { apt = "fish", brew = "fish", nix = "fish" }
+kitty = { apt = "kitty", nix = "kitty", brew-cask = "kitty" }
+starship = { brew = "starship", nix = "starship", cargo = "starship", snap = "starship" }
+stow = { apt = "stow", brew = "stow", nix = "stow" }
+tmux = { apt = "tmux", brew = "tmux", nix = "tmux" }
+wezterm = { nix = "wezterm", flatpak = "org.wezfurlong.wezterm", brew-cask = "wezterm" }
+zellij = { brew = "zellij", nix = "zellij", cargo = "zellij" }
+zsh = { apt = "zsh", brew = "zsh", nix = "zsh" }
+
+# --- editors ---
+emacs = { apt = "emacs", brew = "emacs", nix = "emacs", snap = "emacs" }
+nano = { apt = "nano", brew = "nano", nix = "nano" }
+neovim = { apt = "neovim", brew = "neovim", nix = "neovim", snap = "nvim" }
+vim = { apt = "vim", brew = "vim", nix = "vim" }
+
+# --- git & friends ---
+gh = { apt = "gh", brew = "gh", nix = "gh" }
+git = { apt = "git", brew = "git", nix = "git" }
+git-delta = { brew = "git-delta", nix = "delta", cargo = "git-delta" }
+git-filter-repo = { apt = "git-filter-repo", brew = "git-filter-repo", nix = "git-filter-repo", pip = "git-filter-repo" }
+git-lfs = { apt = "git-lfs", brew = "git-lfs", nix = "git-lfs" }
+gitui = { brew = "gitui", nix = "gitui", cargo = "gitui" }
+glab = { brew = "glab", nix = "glab" }
+difftastic = { brew = "difftastic", nix = "difftastic", cargo = "difftastic" }
+lazygit = { brew = "lazygit", nix = "lazygit" }
+tig = { apt = "tig", brew = "tig", nix = "tig" }
+
+# --- networking & transfer ---
+aria2 = { apt = "aria2", brew = "aria2", nix = "aria2" }
+curl = { apt = "curl", brew = "curl", nix = "curl" }
+httpie = { apt = "httpie", brew = "httpie", nix = "httpie", pip = "httpie" }
+mosh = { apt = "mosh", brew = "mosh", nix = "mosh" }
+mtr = { apt = "mtr", brew = "mtr", nix = "mtr" }
+nmap = { apt = "nmap", brew = "nmap", nix = "nmap" }
+openssh-client = { apt = "openssh-client", brew = "openssh", nix = "openssh" }
+openssh-server = { apt = "openssh-server", brew = "openssh", nix = "openssh" }
+rclone = { apt = "rclone", brew = "rclone", nix = "rclone", snap = "rclone" }
+rsync = { apt = "rsync", brew = "rsync", nix = "rsync" }
+socat = { apt = "socat", brew = "socat", nix = "socat" }
+speedtest-cli = { apt = "speedtest-cli", brew = "speedtest-cli", nix = "speedtest-cli", pip = "speedtest-cli" }
+tcpdump = { apt = "tcpdump", brew = "tcpdump", nix = "tcpdump" }
+wget = { apt = "wget", brew = "wget", nix = "wget" }
+wireshark = { apt = "wireshark", nix = "wireshark" }
+
+# --- backup & sync ---
+borgbackup = { apt = "borgbackup", brew = "borgbackup", nix = "borgbackup", pip = "borgbackup" }
+restic = { apt = "restic", brew = "restic", nix = "restic" }
+syncthing = { apt = "syncthing", brew = "syncthing", nix = "syncthing" }
+
+# --- security & secrets ---
+age = { apt = "age", brew = "age", nix = "age" }
+gnupg = { apt = "gnupg", brew = "gnupg", nix = "gnupg" }
+keepassxc = { apt = "keepassxc", nix = "keepassxc", snap = "keepassxc", flatpak = "org.keepassxc.KeePassXC" }
+openssl = { apt = "openssl", brew = "openssl", nix = "openssl" }
+pass = { apt = "pass", brew = "pass", nix = "pass" }
+sops = { brew = "sops", nix = "sops" }
+
+# --- archives & compression ---
+lz4 = { apt = "lz4", brew = "lz4", nix = "lz4" }
+p7zip = { apt = "p7zip-full", brew = "p7zip", nix = "p7zip" }
+unzip = { apt = "unzip", brew = "unzip", nix = "unzip" }
+xz = { apt = "xz-utils", brew = "xz", nix = "xz" }
+zip = { apt = "zip", brew = "zip", nix = "zip" }
+zstd = { apt = "zstd", brew = "zstd", nix = "zstd" }
+
+# --- build tools & compilers ---
+autoconf = { apt = "autoconf", brew = "autoconf", nix = "autoconf" }
+automake = { apt = "automake", brew = "automake", nix = "automake" }
+ccache = { apt = "ccache", brew = "ccache", nix = "ccache" }
+clang = { apt = "clang", nix = "clang" }
+cmake = { apt = "cmake", brew = "cmake", nix = "cmake", snap = "cmake" }
+gcc = { apt = "gcc", brew = "gcc", nix = "gcc" }
+gdb = { apt = "gdb", brew = "gdb", nix = "gdb" }
+make = { apt = "make", brew = "make", nix = "gnumake" }
+meson = { apt = "meson", brew = "meson", nix = "meson", pip = "meson" }
+ninja = { apt = "ninja-build", brew = "ninja", nix = "ninja" }
+pkg-config = { apt = "pkg-config", brew = "pkg-config", nix = "pkg-config" }
+
+# --- languages & runtimes ---
+deno = { brew = "deno", nix = "deno", snap = "deno" }
+go = { apt = "golang-go", brew = "go", nix = "go", snap = "go" }
+golang = { apt = "golang", brew = "go", nix = "go", snap = "go" }
+jdk = { apt = "default-jdk", brew = "openjdk", nix = "jdk" }
+node = { apt = "nodejs", brew = "node", nix = "nodejs", snap = "node" }
+perl = { apt = "perl", brew = "perl", nix = "perl" }
+php = { apt = "php", brew = "php", nix = "php" }
+python3 = { apt = "python3", brew = "python", nix = "python3" }
+python3-pip = { apt = "python3-pip", brew = "python", nix = "python3Packages.pip" }
+python3-venv = { apt = "python3-venv", brew = "python", nix = "python3" }
+ruby = { apt = "ruby", brew = "ruby", nix = "ruby" }
+rustup = { apt = "rustup", brew = "rustup", nix = "rustup", snap = "rustup" }
+
+# --- python tooling ---
+black = { apt = "black", brew = "black", nix = "black", pip = "black" }
+cookiecutter = { apt = "cookiecutter", brew = "cookiecutter", nix = "cookiecutter", pip = "cookiecutter" }
+ipython = { apt = "ipython3", pip = "ipython" }
+mypy = { apt = "mypy", brew = "mypy", nix = "mypy", pip = "mypy" }
+pipx = { apt = "pipx", brew = "pipx", nix = "pipx", pip = "pipx" }
+poetry = { apt = "python3-poetry", brew = "poetry", nix = "poetry", pip = "poetry" }
+pre-commit = { apt = "pre-commit", brew = "pre-commit", nix = "pre-commit", pip = "pre-commit" }
+ruff = { brew = "ruff", nix = "ruff", pip = "ruff" }
+uv = { brew = "uv", nix = "uv", pip = "uv" }
+virtualenv = { apt = "python3-virtualenv", brew = "virtualenv", pip = "virtualenv" }
+yamllint = { apt = "yamllint", brew = "yamllint", nix = "yamllint", pip = "yamllint" }
+
+# --- node tooling ---
+eslint = { brew = "eslint", nix = "nodePackages.eslint", npm = "eslint" }
+firebase-tools = { brew = "firebase-cli", nix = "firebase-tools", npm = "firebase-tools" }
+http-server = { nix = "nodePackages.http-server", npm = "http-server" }
+nodemon = { nix = "nodePackages.nodemon", npm = "nodemon" }
+pnpm = { brew = "pnpm", nix = "pnpm", npm = "pnpm" }
+prettier = { brew = "prettier", nix = "nodePackages.prettier", npm = "prettier" }
+typescript = { apt = "node-typescript", brew = "typescript", nix = "typescript", npm = "typescript" }
+yarn = { apt = "yarnpkg", brew = "yarn", nix = "yarn", npm = "yarn" }
+
+# --- containers & infrastructure ---
+ansible = { apt = "ansible", brew = "ansible", nix = "ansible", pip = "ansible" }
+awscli = { apt = "awscli", brew = "awscli", nix = "awscli2", pip = "awscli" }
+azure-cli = { brew = "azure-cli", nix = "azure-cli", pip = "azure-cli" }
+docker = { apt = "docker.io", brew = "docker", nix = "docker", snap = "docker" }
+docker-ce = { apt = "docker-ce", brew = "docker", nix = "docker" }
+docker-compose = { apt = "docker-compose", brew = "docker-compose", nix = "docker-compose" }
+helm = { brew = "helm", nix = "kubernetes-helm", snap = "helm" }
+k9s = { brew = "k9s", nix = "k9s" }
+kind = { brew = "kind", nix = "kind" }
+kubectl = { brew = "kubectl", nix = "kubectl", snap = "kubectl" }
+lazydocker = { brew = "lazydocker", nix = "lazydocker" }
+minikube = { brew = "minikube", nix = "minikube" }
+opentofu = { brew = "opentofu", nix = "opentofu" }
+podman = { apt = "podman", brew = "podman", nix = "podman" }
+terraform = { brew = "terraform", nix = "terraform" }
+
+# --- shell scripting & quality ---
+hadolint = { brew = "hadolint", nix = "hadolint" }
+shellcheck = { apt = "shellcheck", brew = "shellcheck", nix = "shellcheck" }
+shfmt = { apt = "shfmt", brew = "shfmt", nix = "shfmt" }
+
+# --- task runners & file watching ---
+entr = { apt = "entr", brew = "entr", nix = "entr" }
+just = { brew = "just", nix = "just", cargo = "just" }
+mdbook = { brew = "mdbook", nix = "mdbook", cargo = "mdbook" }
+moreutils = { apt = "moreutils", brew = "moreutils", nix = "moreutils" }
+parallel = { apt = "parallel", brew = "parallel", nix = "parallel" }
+pv = { apt = "pv", brew = "pv", nix = "pv" }
+watchexec = { brew = "watchexec", nix = "watchexec", cargo = "watchexec-cli" }
+
+# --- docs & media tooling ---
+asciinema = { apt = "asciinema", brew = "asciinema", nix = "asciinema", pip = "asciinema" }
+ffmpeg = { apt = "ffmpeg", brew = "ffmpeg", nix = "ffmpeg", snap = "ffmpeg" }
+graphviz = { apt = "graphviz", brew = "graphviz", nix = "graphviz" }
+hugo = { apt = "hugo", brew = "hugo", nix = "hugo", snap = "hugo" }
+imagemagick = { apt = "imagemagick", brew = "imagemagick", nix = "imagemagick" }
+pandoc = { apt = "pandoc", brew = "pandoc", nix = "pandoc" }
+streamlink = { apt = "streamlink", brew = "streamlink", nix = "streamlink", pip = "streamlink" }
+yt-dlp = { apt = "yt-dlp", brew = "yt-dlp", nix = "yt-dlp", pip = "yt-dlp" }
+
+# --- databases & clients ---
+mycli = { apt = "mycli", brew = "mycli", nix = "mycli", pip = "mycli" }
+pgcli = { apt = "pgcli", brew = "pgcli", nix = "pgcli", pip = "pgcli" }
+postgresql = { apt = "postgresql", nix = "postgresql" }
+redis = { apt = "redis", brew = "redis", nix = "redis" }
+sqlite = { apt = "sqlite3", brew = "sqlite", nix = "sqlite" }
+
+# --- misc CLI ---
+cowsay = { apt = "cowsay", brew = "cowsay", nix = "cowsay" }
+figlet = { apt = "figlet", brew = "figlet", nix = "figlet" }
+fortune = { apt = "fortune-mod", brew = "fortune", nix = "fortune" }
+lolcat = { apt = "lolcat", brew = "lolcat", nix = "lolcat" }
+ranger = { apt = "ranger", brew = "ranger", nix = "ranger", pip = "ranger-fm" }
+tealdeer = { apt = "tealdeer", brew = "tealdeer", nix = "tealdeer", cargo = "tealdeer" }
+thefuck = { apt = "thefuck", brew = "thefuck", nix = "thefuck", pip = "thefuck" }
+tldr = { apt = "tldr", brew = "tldr", nix = "tldr", pip = "tldr", npm = "tldr" }
+tree = { apt = "tree", brew = "tree", nix = "tree" }
+wl-clipboard = { apt = "wl-clipboard", brew = "wl-clipboard", nix = "wl-clipboard" }
+xclip = { apt = "xclip", nix = "xclip" }
+
+# --- GUI applications (flatpak/snap ↔ apt/nix/brew casks) ---
+audacity = { apt = "audacity", nix = "audacity", snap = "audacity", flatpak = "org.audacityteam.Audacity", brew-cask = "audacity" }
+bitwarden = { snap = "bitwarden", flatpak = "com.bitwarden.desktop", brew-cask = "bitwarden" }
+blender = { apt = "blender", nix = "blender", snap = "blender", flatpak = "org.blender.Blender", brew-cask = "blender" }
+brave = { nix = "brave", snap = "brave", flatpak = "com.brave.Browser", brew-cask = "brave-browser" }
+calibre = { apt = "calibre", nix = "calibre", flatpak = "com.calibre_ebook.calibre", brew-cask = "calibre" }
+chromium = { apt = "chromium", nix = "chromium", snap = "chromium", flatpak = "org.chromium.Chromium", brew-cask = "chromium" }
+darktable = { apt = "darktable", nix = "darktable", flatpak = "org.darktable.Darktable", brew-cask = "darktable" }
+discord = { nix = "discord", snap = "discord", flatpak = "com.discordapp.Discord", brew-cask = "discord" }
+element = { nix = "element-desktop", snap = "element-desktop", flatpak = "im.riot.Riot", brew-cask = "element" }
+firefox = { apt = "firefox", nix = "firefox", snap = "firefox", flatpak = "org.mozilla.firefox", brew-cask = "firefox" }
+gimp = { apt = "gimp", nix = "gimp", snap = "gimp", flatpak = "org.gimp.GIMP", brew-cask = "gimp" }
+handbrake = { apt = "handbrake", nix = "handbrake", flatpak = "fr.handbrake.ghb", brew-cask = "handbrake" }
+inkscape = { apt = "inkscape", nix = "inkscape", snap = "inkscape", flatpak = "org.inkscape.Inkscape", brew-cask = "inkscape" }
+kdenlive = { apt = "kdenlive", nix = "kdenlive", snap = "kdenlive", flatpak = "org.kde.kdenlive", brew-cask = "kdenlive" }
+krita = { apt = "krita", nix = "krita", snap = "krita", flatpak = "org.kde.krita", brew-cask = "krita" }
+libreoffice = { apt = "libreoffice", nix = "libreoffice", snap = "libreoffice", flatpak = "org.libreoffice.LibreOffice", brew-cask = "libreoffice" }
+mpv = { apt = "mpv", brew = "mpv", nix = "mpv", snap = "mpv", flatpak = "io.mpv.Mpv" }
+obs-studio = { apt = "obs-studio", nix = "obs-studio", snap = "obs-studio", flatpak = "com.obsproject.Studio", brew-cask = "obs" }
+obsidian = { nix = "obsidian", snap = "obsidian", flatpak = "md.obsidian.Obsidian", brew-cask = "obsidian" }
+postman = { nix = "postman", snap = "postman", flatpak = "com.getpostman.Postman", brew-cask = "postman" }
+qbittorrent = { apt = "qbittorrent", nix = "qbittorrent", flatpak = "org.qbittorrent.qBittorrent", brew-cask = "qbittorrent" }
+signal-desktop = { nix = "signal-desktop", snap = "signal-desktop", flatpak = "org.signal.Signal", brew-cask = "signal" }
+slack = { nix = "slack", snap = "slack", flatpak = "com.slack.Slack", brew-cask = "slack" }
+spotify = { nix = "spotify", snap = "spotify", flatpak = "com.spotify.Client", brew-cask = "spotify" }
+steam = { nix = "steam", flatpak = "com.valvesoftware.Steam", brew-cask = "steam" }
+telegram = { nix = "telegram-desktop", snap = "telegram-desktop", flatpak = "org.telegram.desktop", brew-cask = "telegram-desktop" }
+thunderbird = { apt = "thunderbird", nix = "thunderbird", snap = "thunderbird", flatpak = "org.mozilla.Thunderbird", brew-cask = "thunderbird" }
+vlc = { apt = "vlc", nix = "vlc", snap = "vlc", flatpak = "org.videolan.VLC", brew-cask = "vlc" }
+vscode = { nix = "vscode", snap = "code", flatpak = "com.visualstudio.code", brew-cask = "visual-studio-code" }
+zoom = { nix = "zoom-us", snap = "zoom-client", flatpak = "us.zoom.Zoom", brew-cask = "zoom" }
