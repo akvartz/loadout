@@ -52,6 +52,14 @@ func New(settings map[string]string) (*Converter, error) {
 	return c, nil
 }
 
+// identityUnsafe lists target namespaces the identity fallback must not
+// guess into: their names follow conventions of their own, so a same-name
+// assumption is almost always wrong.
+var identityUnsafe = map[string]bool{
+	"brew-cask": true,
+	"flatpak":   true,
+}
+
 func (c *Converter) Name() string { return "converter" }
 
 func (c *Converter) Convert(req plugin.ConvertRequest) ([]plugin.ConvertResult, error) {
@@ -63,8 +71,9 @@ func (c *Converter) Convert(req plugin.ConvertRequest) ([]plugin.ConvertResult, 
 		}
 		// Identity fallback: assume the name carries over unchanged. Names
 		// containing a dot never do (flatpak app IDs, apt's docker.io), so
-		// they are left untranslated regardless.
-		if c.identity && !strings.Contains(pkg, ".") {
+		// they are left untranslated regardless. Namespaces with their own
+		// naming schemes (casks, flatpak IDs) are never targeted blindly.
+		if c.identity && !strings.Contains(pkg, ".") && !identityUnsafe[req.To] {
 			results[i] = plugin.ConvertResult{Original: pkg, Converted: pkg, Found: true}
 			continue
 		}

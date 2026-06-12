@@ -56,21 +56,23 @@ func runRestore(_ *cobra.Command, _ []string) error {
 		}
 	}
 
-	// Optionally translate package names into another manager's namespace:
+	// Optionally translate package names into other managers' namespaces:
 	// the target's by default, or an explicit one via --convert-to (the way
 	// to convert for the shell target, which has no single manager).
 	if convertPkgs || convertTo != "" {
-		convTarget := convertTo
-		if convTarget == "" {
-			convTarget = conversionManager(restoreTarget)
+		namespaces := conversionManagers(restoreTarget)
+		if convertTo != "" {
+			namespaces = []string{convertTo}
 		}
 		switch {
-		case convTarget == "":
+		case len(namespaces) == 0:
 			fmt.Fprintf(os.Stderr, "warning: --convert has no effect for target %q — use --convert-to <manager> to pick a namespace\n", restoreTarget)
 		case len(mgr.Converters()) == 0:
 			fmt.Fprintln(os.Stderr, `warning: conversion requested but no converters are enabled — add one to plugins.enabled in the config (e.g. "converter")`)
 		default:
-			s = mgr.ApplyConversion(s, convTarget)
+			for _, ns := range namespaces {
+				s = mgr.ApplyConversion(s, ns)
+			}
 		}
 	}
 
@@ -111,18 +113,19 @@ func runRestore(_ *cobra.Command, _ []string) error {
 	return runErr
 }
 
-// conversionManager maps a restore target to the package-manager namespace that
-// converters translate into and that the target's generator reads from. The
-// "shell" target restores with each native manager, so there is nothing to
-// convert into ("").
-func conversionManager(target string) string {
+// conversionManagers maps a restore target to the package-manager namespaces
+// that converters translate into and that the target's generator reads from,
+// applied in order. The "shell" target restores with each native manager, so
+// there is nothing to convert into (nil). The brewfile target converts to
+// formulas first, then offers casks for what remains (GUI apps).
+func conversionManagers(target string) []string {
 	switch target {
 	case "shell":
-		return ""
+		return nil
 	case "brewfile":
-		return "brew"
+		return []string{"brew", "brew-cask"}
 	}
-	return target
+	return []string{target}
 }
 
 // resolveGenerator finds a Generator by name from built-ins then plugin-provided ones.

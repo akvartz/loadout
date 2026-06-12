@@ -17,9 +17,10 @@ func stateWith(sources map[string][]string) state.State {
 
 func TestShellGenerate(t *testing.T) {
 	script, err := NewShell().Generate(stateWith(map[string][]string{
-		"apt":     {"curl", "git"},
-		"flatpak": {"org.signal.Signal"},
-		"cargo":   {"ripgrep"},
+		"apt":       {"curl", "git"},
+		"flatpak":   {"org.signal.Signal"},
+		"cargo":     {"ripgrep"},
+		"brew-cask": {"firefox"},
 	}))
 	if err != nil {
 		t.Fatal(err)
@@ -31,6 +32,7 @@ func TestShellGenerate(t *testing.T) {
 		"sudo apt-get install -y curl git",
 		"flatpak install -y flathub org.signal.Signal",
 		"cargo install ripgrep",
+		"brew install --cask firefox",
 	} {
 		if !strings.Contains(script, want) {
 			t.Errorf("script missing %q:\n%s", want, script)
@@ -40,14 +42,15 @@ func TestShellGenerate(t *testing.T) {
 
 func TestBrewfileGenerate(t *testing.T) {
 	script, err := NewBrewfile().Generate(stateWith(map[string][]string{
-		"brew": {"fd", "ripgrep"},
-		"apt":  {"cowsay"},
+		"brew":      {"fd", "ripgrep"},
+		"brew-cask": {"firefox"},
+		"apt":       {"cowsay"},
 	}))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, want := range []string{`brew "fd"`, `brew "ripgrep"`} {
+	for _, want := range []string{`brew "fd"`, `brew "ripgrep"`, `cask "firefox"`} {
 		if !strings.Contains(script, want) {
 			t.Errorf("Brewfile missing %q:\n%s", want, script)
 		}

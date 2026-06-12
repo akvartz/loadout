@@ -1,6 +1,7 @@
 package loadout
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -9,16 +10,16 @@ import (
 	"github.com/akvartz/loadout/internal/state"
 )
 
-func TestConversionManager(t *testing.T) {
-	cases := map[string]string{
-		"shell":    "",     // shell restores with native managers — nothing to convert into
-		"brewfile": "brew", // the Brewfile generator reads the "brew" source
-		"nix":      "nix",
-		"custom":   "custom", // plugin-provided targets pass through
+func TestConversionManagers(t *testing.T) {
+	cases := map[string][]string{
+		"shell":    nil,                   // native managers — nothing to convert into
+		"brewfile": {"brew", "brew-cask"}, // formulas first, casks for the rest
+		"nix":      {"nix"},
+		"custom":   {"custom"}, // plugin-provided targets pass through
 	}
 	for target, want := range cases {
-		if got := conversionManager(target); got != want {
-			t.Errorf("conversionManager(%q) = %q, want %q", target, got, want)
+		if got := conversionManagers(target); !reflect.DeepEqual(got, want) {
+			t.Errorf("conversionManagers(%q) = %v, want %v", target, got, want)
 		}
 	}
 }
@@ -36,8 +37,12 @@ func TestConvertedRestoreToBrewfile(t *testing.T) {
 
 	s := state.New()
 	s.Sources["apt"] = state.SourceState{Packages: []string{"fd-find", "libdebian-only-dev"}}
+	s.Sources["flatpak"] = state.SourceState{Packages: []string{"org.gimp.GIMP"}}
+	s.Sources["snap"] = state.SourceState{Packages: []string{"spotify"}}
 
-	s = mgr.ApplyConversion(s, conversionManager("brewfile"))
+	for _, ns := range conversionManagers("brewfile") {
+		s = mgr.ApplyConversion(s, ns)
+	}
 
 	gen, err := resolveGenerator("brewfile", mgr)
 	if err != nil {
@@ -50,6 +55,12 @@ func TestConvertedRestoreToBrewfile(t *testing.T) {
 
 	if !strings.Contains(script, `brew "fd"`) {
 		t.Errorf("Brewfile missing converted apt package:\n%s", script)
+	}
+	// GUI apps from flatpak/snap come out as casks in the second pass.
+	for _, want := range []string{`cask "gimp"`, `cask "spotify"`} {
+		if !strings.Contains(script, want) {
+			t.Errorf("Brewfile missing %s:\n%s", want, script)
+		}
 	}
 	if !strings.Contains(script, "#   libdebian-only-dev") {
 		t.Errorf("Brewfile should keep untranslatable apt packages as comments:\n%s", script)
@@ -110,7 +121,9 @@ func TestConvertedRestoreToNix(t *testing.T) {
 	s := state.New()
 	s.Sources["apt"] = state.SourceState{Packages: []string{"golang-go"}}
 
-	s = mgr.ApplyConversion(s, conversionManager("nix"))
+	for _, ns := range conversionManagers("nix") {
+		s = mgr.ApplyConversion(s, ns)
+	}
 
 	gen, err := resolveGenerator("nix", mgr)
 	if err != nil {

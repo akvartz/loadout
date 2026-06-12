@@ -27,6 +27,7 @@ func All() []Detector {
 		&Npm{},
 		&AppImage{},
 		&Brew{},
+		&BrewCask{},
 		&Nix{},
 	}
 }
