@@ -56,7 +56,14 @@ func runRestore(_ *cobra.Command, _ []string) error {
 
 	// Optionally translate package names into the target manager's namespace.
 	if convertPkgs {
-		s = mgr.ApplyConversion(s, restoreTarget)
+		switch convTarget := conversionManager(restoreTarget); {
+		case convTarget == "":
+			fmt.Fprintf(os.Stderr, "warning: --convert has no effect for target %q\n", restoreTarget)
+		case len(mgr.Converters()) == 0:
+			fmt.Fprintln(os.Stderr, `warning: --convert requested but no converters are enabled — add one to plugins.enabled in the config (e.g. "converter")`)
+		default:
+			s = mgr.ApplyConversion(s, convTarget)
+		}
 	}
 
 	gen, err := resolveGenerator(restoreTarget, mgr)
@@ -94,6 +101,20 @@ func runRestore(_ *cobra.Command, _ []string) error {
 	}
 
 	return runErr
+}
+
+// conversionManager maps a restore target to the package-manager namespace that
+// converters translate into and that the target's generator reads from. The
+// "shell" target restores with each native manager, so there is nothing to
+// convert into ("").
+func conversionManager(target string) string {
+	switch target {
+	case "shell":
+		return ""
+	case "brewfile":
+		return "brew"
+	}
+	return target
 }
 
 // resolveGenerator finds a Generator by name from built-ins then plugin-provided ones.
