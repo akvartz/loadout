@@ -90,7 +90,7 @@ For `brewfile` and `nix`, packages from other managers are listed as comments by
 
 ### Translate package names with `--convert`
 
-Package names differ between managers (`fd-find` on apt is `fd` on brew and nix). With `--convert`, loadout runs each package through the enabled converter plugins and merges translated names into the target manager's install list; names with no known translation stay behind as comments:
+Package names differ between managers (`fd-find` on apt is `fd` on brew and nix; VS Code is `code` on snap, `com.visualstudio.code` on flatpak, and `vscode` on nix). With `--convert`, loadout runs each package through the enabled converter plugins and merges translated names into the target manager's install list; names with no known translation stay with their original manager (as comments in `brewfile`/`nix` output):
 
 ```sh
 loadout restore --target brewfile --convert
@@ -106,11 +106,61 @@ brew "ripgrep"
 #   some-debian-only-tool
 ```
 
-Conversion is plugin-based and nothing is enabled by default. Enable the built-in `converter` plugin (a curated apt → brew/nix table of common CLI tools) in `~/.config/loadout/config.toml`:
+Conversion is plugin-based and nothing is enabled by default. Enable the built-in `converter` plugin in `~/.config/loadout/config.toml`:
 
 ```toml
 [plugins]
 enabled = ["converter"]
+```
+
+The built-in converter ships a curated table of common CLI tools and desktop apps keyed by canonical identity, so any manager pair converts in both directions: `apt`, `brew`, `nix`, `snap`, `flatpak`, `pip`, `cargo`, and `npm`. brew translations cover formulas only — GUI apps that would need a cask are left as comments.
+
+### Switch distros with `--convert-to`
+
+The `shell` target restores each source with its native manager, so plain `--convert` has nothing to convert into. When you're moving to a machine where those managers don't exist — macOS + Homebrew to Ubuntu, say — pick the new machine's manager explicitly:
+
+```sh
+# On the new Ubuntu box, with a snapshot taken on a Mac:
+loadout restore --target shell --convert-to apt
+```
+
+```sh
+#!/usr/bin/env sh
+set -e
+
+# apt
+sudo apt-get install -y fd-find ripgrep silversearcher-ag gimp
+...
+```
+
+Everything translatable becomes an apt install; the rest stays under its original manager so nothing silently disappears. A per-source summary is printed to stderr (`convert: brew -> apt: translated 12 of 15 packages`).
+
+### Extend the translation table
+
+No table is complete. Point the converter at your own mappings — they extend and override the built-ins:
+
+```toml
+[plugins]
+enabled = ["converter"]
+
+[plugin.converter]
+table = "~/.config/loadout/conversions.toml"
+```
+
+```toml
+# ~/.config/loadout/conversions.toml
+[packages]
+# One entry per logical package; keys are manager names.
+mytool = { apt = "mytool-bin", brew = "mytool", nix = "mytool" }
+# Override a single mapping of a built-in entry, or disable one with "".
+fd = { nix = "" }
+```
+
+For packages that keep the same name everywhere, the opt-in identity fallback assumes untranslated names carry over unchanged (names containing a dot, like flatpak app IDs, never do). Expect occasional misses — the generated script will fail on names the target manager doesn't have:
+
+```toml
+[plugin.converter]
+fallback = "identity"
 ```
 
 ### Use a custom file path
@@ -188,7 +238,7 @@ loadout plugins list
 
 ### Built-in plugins
 
-- **`converter`** — static apt → brew/nix name-translation table covering common CLI tools. Powers `restore --convert`.
+- **`converter`** — canonical name-translation table (~200 packages) across apt, brew, nix, snap, flatpak, pip, cargo, and npm, extensible via a user table. Powers `restore --convert` and `--convert-to`.
 - **`cloud`** — copies the state file to a configured `destination` after each snapshot.
 
 ### External plugins
@@ -197,7 +247,8 @@ Any executable named `loadout-plugin-<name>` on your `PATH` is discovered automa
 
 ## Roadmap
 
-- **Broader name translation** — the built-in converter covers ~50 common CLI tools from `apt` only. Planned: more source managers (snap, flatpak, pip) and a converter plugin backed by a real package database (e.g. Repology)
+- **Database-backed translation** — an external converter plugin backed by a real package database (e.g. Repology) for coverage beyond the curated table
+- **Brew cask support** — translate GUI apps (flatpak/snap) into `cask` entries in Brewfile output
 
 ## License
 
