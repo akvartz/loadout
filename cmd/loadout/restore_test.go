@@ -35,7 +35,7 @@ func TestConvertedRestoreToBrewfile(t *testing.T) {
 	defer mgr.Close() //nolint:errcheck
 
 	s := state.New()
-	s.Sources["apt"] = state.SourceState{Packages: []string{"fd-find", "cowsay"}}
+	s.Sources["apt"] = state.SourceState{Packages: []string{"fd-find", "libdebian-only-dev"}}
 
 	s = mgr.ApplyConversion(s, conversionManager("brewfile"))
 
@@ -51,8 +51,50 @@ func TestConvertedRestoreToBrewfile(t *testing.T) {
 	if !strings.Contains(script, `brew "fd"`) {
 		t.Errorf("Brewfile missing converted apt package:\n%s", script)
 	}
-	if !strings.Contains(script, "#   cowsay") {
+	if !strings.Contains(script, "#   libdebian-only-dev") {
 		t.Errorf("Brewfile should keep untranslatable apt packages as comments:\n%s", script)
+	}
+}
+
+// Moving machines across managers: a brew/snap/flatpak snapshot restored on a
+// Debian box with --target shell --convert-to apt must come out as apt installs.
+func TestConvertedRestoreToShellViaConvertTo(t *testing.T) {
+	var cfg config.Config
+	cfg.Plugins.Enabled = []string{"converter"}
+	mgr, err := plugin.New(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mgr.Close() //nolint:errcheck
+
+	s := state.New()
+	s.Sources["brew"] = state.SourceState{Packages: []string{"fd", "the_silver_searcher"}}
+	s.Sources["snap"] = state.SourceState{Packages: []string{"nvim"}}
+	s.Sources["flatpak"] = state.SourceState{Packages: []string{"org.gimp.GIMP"}}
+
+	s = mgr.ApplyConversion(s, "apt")
+
+	gen, err := resolveGenerator("shell", mgr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	script, err := gen.Generate(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, want := range []string{"fd-find", "silversearcher-ag", "neovim", "gimp"} {
+		if !strings.Contains(script, want) {
+			t.Errorf("shell script missing converted package %q:\n%s", want, script)
+		}
+	}
+	if !strings.Contains(script, "sudo apt-get install -y") {
+		t.Errorf("shell script missing apt install line:\n%s", script)
+	}
+	for _, gone := range []string{"brew install", "snap install", "flatpak install"} {
+		if strings.Contains(script, gone) {
+			t.Errorf("shell script still installs via source manager (%q):\n%s", gone, script)
+		}
 	}
 }
 

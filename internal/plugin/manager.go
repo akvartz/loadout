@@ -157,6 +157,9 @@ func (m *Manager) ApplyConversion(s state.State, target string) state.State {
 			remaining = unfound
 		}
 
+		fmt.Fprintf(os.Stderr, "convert: %s -> %s: translated %d of %d packages\n",
+			src, target, len(converted), len(ss.Packages))
+
 		// Merge converted into target source.
 		if len(converted) > 0 {
 			tgt := out.Sources[target]

@@ -16,6 +16,7 @@ var (
 	restoreTarget string
 	applyRestore  bool
 	convertPkgs   bool
+	convertTo     string
 )
 
 var restoreCmd = &cobra.Command{
@@ -28,6 +29,7 @@ func init() {
 	restoreCmd.Flags().StringVarP(&restoreTarget, "target", "t", "shell", "restore target: shell, brewfile, nix, or a plugin-provided target")
 	restoreCmd.Flags().BoolVar(&applyRestore, "apply", false, "execute the generated script (default: dry-run)")
 	restoreCmd.Flags().BoolVar(&convertPkgs, "convert", false, "translate package names to the target manager using converters")
+	restoreCmd.Flags().StringVar(&convertTo, "convert-to", "", "translate package names into this manager's namespace instead of the target's (implies --convert); e.g. --target shell --convert-to apt")
 	rootCmd.AddCommand(restoreCmd)
 }
 
@@ -54,13 +56,19 @@ func runRestore(_ *cobra.Command, _ []string) error {
 		}
 	}
 
-	// Optionally translate package names into the target manager's namespace.
-	if convertPkgs {
-		switch convTarget := conversionManager(restoreTarget); {
+	// Optionally translate package names into another manager's namespace:
+	// the target's by default, or an explicit one via --convert-to (the way
+	// to convert for the shell target, which has no single manager).
+	if convertPkgs || convertTo != "" {
+		convTarget := convertTo
+		if convTarget == "" {
+			convTarget = conversionManager(restoreTarget)
+		}
+		switch {
 		case convTarget == "":
-			fmt.Fprintf(os.Stderr, "warning: --convert has no effect for target %q\n", restoreTarget)
+			fmt.Fprintf(os.Stderr, "warning: --convert has no effect for target %q — use --convert-to <manager> to pick a namespace\n", restoreTarget)
 		case len(mgr.Converters()) == 0:
-			fmt.Fprintln(os.Stderr, `warning: --convert requested but no converters are enabled — add one to plugins.enabled in the config (e.g. "converter")`)
+			fmt.Fprintln(os.Stderr, `warning: conversion requested but no converters are enabled — add one to plugins.enabled in the config (e.g. "converter")`)
 		default:
 			s = mgr.ApplyConversion(s, convTarget)
 		}
