@@ -92,6 +92,9 @@ func TestConvertSnapAndFlatpak(t *testing.T) {
 		{"pip", "brew", "ranger-fm", "ranger"},
 		{"cargo", "apt", "fd-find", "fd-find"},
 		{"npm", "brew", "firebase-tools", "firebase-cli"},
+		{"flatpak", "brew-cask", "org.gimp.GIMP", "gimp"},
+		{"snap", "brew-cask", "code", "visual-studio-code"},
+		{"brew-cask", "apt", "firefox", "firefox"},
 	}
 	for _, tc := range cases {
 		if got := convertOne(t, c, tc.from, tc.to, tc.in); !got.Found || got.Converted != tc.want {
@@ -134,6 +137,12 @@ func TestIdentityFallback(t *testing.T) {
 	for _, pkg := range []string{"io.github.some.App", "docker.io"} {
 		if got := convertOne(t, c, "flatpak", "brew", pkg); got.Found {
 			t.Errorf("identity fallback must skip dotted name %q, got %+v", pkg, got)
+		}
+	}
+	// Namespaces with their own naming schemes are never guessed into.
+	for _, to := range []string{"brew-cask", "flatpak"} {
+		if got := convertOne(t, c, "apt", to, "obscure-tool"); got.Found {
+			t.Errorf("identity fallback must not target %s, got %+v", to, got)
 		}
 	}
 }

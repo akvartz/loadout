@@ -53,6 +53,10 @@ func (s *Shell) Generate(st state.State) (string, error) {
 		fmt.Fprintf(&b, "# brew\nbrew install %s\n\n", strings.Join(pkgs, " "))
 	}
 
+	if pkgs := st.Sources["brew-cask"].Packages; len(pkgs) > 0 {
+		fmt.Fprintf(&b, "# brew casks\nbrew install --cask %s\n\n", strings.Join(pkgs, " "))
+	}
+
 	if pkgs := st.Sources["nix"].Packages; len(pkgs) > 0 {
 		fmt.Fprintf(&b, "# nix\nnix-env -iA %s\n\n", strings.Join(pkgs, " "))
 	}

@@ -46,7 +46,7 @@ func New(cfg config.Config) (*Manager, error) {
 		if !cfg.IsEnabled(name) {
 			continue
 		}
-		client, hs, err := rpc.Start(bin)
+		client, hs, err := rpc.Start(bin, cfg.Settings(name))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "plugin %s: %v\n", name, err)
 			continue
@@ -105,10 +105,17 @@ func (m *Manager) Close() error {
 // into target's namespace using registered converters. target is the
 // package-manager name converters understand (e.g. "brew", "nix"), not a
 // restore-target name. Converted packages are merged (deduplicated) into
-// s.Sources[target]; untranslated packages stay in their source.
-func (m *Manager) ApplyConversion(s state.State, target string) state.State {
+// s.Sources[target]; untranslated packages stay in their source. Sources
+// named in keep are left untouched — used when a restore target reads several
+// namespaces (brew and brew-cask) and converts into them in turn.
+func (m *Manager) ApplyConversion(s state.State, target string, keep ...string) state.State {
 	if len(m.convs) == 0 {
 		return s
+	}
+
+	kept := map[string]bool{target: true}
+	for _, k := range keep {
+		kept[k] = true
 	}
 
 	out := state.State{Meta: s.Meta, Sources: make(map[string]state.SourceState)}
@@ -125,7 +132,7 @@ func (m *Manager) ApplyConversion(s state.State, target string) state.State {
 
 	for _, src := range srcs {
 		ss := s.Sources[src]
-		if src == target || len(ss.Packages) == 0 {
+		if kept[src] || len(ss.Packages) == 0 {
 			continue
 		}
 

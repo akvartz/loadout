@@ -24,6 +24,13 @@ func (bf *Brewfile) Generate(st state.State) (string, error) {
 		b.WriteString("\n")
 	}
 
+	if pkgs := st.Sources["brew-cask"].Packages; len(pkgs) > 0 {
+		for _, p := range pkgs {
+			fmt.Fprintf(&b, "cask %q\n", p)
+		}
+		b.WriteString("\n")
+	}
+
 	unsupported := []string{"apt", "flatpak", "snap", "pip", "cargo", "npm", "appimage", "nix"}
 	for _, src := range unsupported {
 		pkgs := st.Sources[src].Packages

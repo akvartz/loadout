@@ -60,7 +60,7 @@ func runPluginsList(cmd *cobra.Command, _ []string) error {
 	}
 	for _, bin := range binaries {
 		name := rpc.PluginNameFromBinary(bin)
-		client, hs, err := rpc.Start(bin)
+		client, hs, err := rpc.Start(bin, cfg.Settings(name))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "  %s: failed to start: %v\n", name, err)
 			continue
