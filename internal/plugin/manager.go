@@ -3,6 +3,7 @@ package plugin
 import (
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/akvartz/loadout/internal/config"
 	"github.com/akvartz/loadout/internal/plugin/rpc"
@@ -84,8 +85,8 @@ func (m *Manager) classify(inst interface{}) {
 	}
 }
 
-func (m *Manager) Hooks() []Hook         { return m.hooks }
-func (m *Manager) Detectors() []Detector { return m.dets }
+func (m *Manager) Hooks() []Hook           { return m.hooks }
+func (m *Manager) Detectors() []Detector   { return m.dets }
 func (m *Manager) Generators() []Generator { return m.gens }
 func (m *Manager) Converters() []Converter { return m.convs }
 
@@ -101,8 +102,10 @@ func (m *Manager) Close() error {
 }
 
 // ApplyConversion rewrites s so that packages from each source are translated
-// into target's namespace using registered converters. Converted packages are
-// merged into s.Sources[target]; untranslated packages stay in their source.
+// into target's namespace using registered converters. target is the
+// package-manager name converters understand (e.g. "brew", "nix"), not a
+// restore-target name. Converted packages are merged (deduplicated) into
+// s.Sources[target]; untranslated packages stay in their source.
 func (m *Manager) ApplyConversion(s state.State, target string) state.State {
 	if len(m.convs) == 0 {
 		return s
@@ -113,29 +116,45 @@ func (m *Manager) ApplyConversion(s state.State, target string) state.State {
 		out.Sources[src] = ss
 	}
 
-	for src, ss := range s.Sources {
+	// Iterate sources in sorted order so the merged target list is deterministic.
+	srcs := make([]string, 0, len(s.Sources))
+	for src := range s.Sources {
+		srcs = append(srcs, src)
+	}
+	sort.Strings(srcs)
+
+	for _, src := range srcs {
+		ss := s.Sources[src]
 		if src == target || len(ss.Packages) == 0 {
 			continue
 		}
 
-		var converted, unconverted []string
-		for _, pkg := range ss.Packages {
-			found := false
-			for _, conv := range m.convs {
-				results, err := conv.Convert(ConvertRequest{From: src, To: target, Packages: []string{pkg}})
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "converter %s: %v\n", conv.Name(), err)
-					continue
-				}
-				if len(results) > 0 && results[0].Found {
-					converted = append(converted, results[0].Converted)
-					found = true
-					break
+		// Each converter gets the packages the previous ones could not translate.
+		var converted []string
+		remaining := ss.Packages
+		for _, conv := range m.convs {
+			if len(remaining) == 0 {
+				break
+			}
+			results, err := conv.Convert(ConvertRequest{From: src, To: target, Packages: remaining})
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "converter %s: %v\n", conv.Name(), err)
+				continue
+			}
+			if len(results) != len(remaining) {
+				fmt.Fprintf(os.Stderr, "converter %s: returned %d results for %d packages — skipping\n",
+					conv.Name(), len(results), len(remaining))
+				continue
+			}
+			var unfound []string
+			for _, r := range results {
+				if r.Found {
+					converted = append(converted, r.Converted)
+				} else {
+					unfound = append(unfound, r.Original)
 				}
 			}
-			if !found {
-				unconverted = append(unconverted, pkg)
-			}
+			remaining = unfound
 		}
 
 		// Merge converted into target source.
@@ -146,13 +165,34 @@ func (m *Manager) ApplyConversion(s state.State, target string) state.State {
 		}
 
 		// Leave only unconverted in the original source (delete if empty).
-		if len(unconverted) > 0 {
+		if len(remaining) > 0 {
 			orig := out.Sources[src]
-			orig.Packages = unconverted
+			orig.Packages = remaining
 			out.Sources[src] = orig
 		} else {
 			delete(out.Sources, src)
 		}
+	}
+
+	// Different sources can translate to the same target name (e.g. apt's git
+	// converted into a brew list that already contains git).
+	if tgt, ok := out.Sources[target]; ok {
+		tgt.Packages = dedupe(tgt.Packages)
+		out.Sources[target] = tgt
+	}
+	return out
+}
+
+// dedupe removes duplicates from pkgs, keeping first-occurrence order.
+func dedupe(pkgs []string) []string {
+	seen := make(map[string]bool, len(pkgs))
+	out := pkgs[:0:0]
+	for _, p := range pkgs {
+		if seen[p] {
+			continue
+		}
+		seen[p] = true
+		out = append(out, p)
 	}
 	return out
 }
