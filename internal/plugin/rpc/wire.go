@@ -21,6 +21,13 @@ type Response struct {
 	Error   string          `json:"error,omitempty"`
 }
 
+// HandshakeParams carries the plugin's settings from the [plugin.<name>]
+// table of the loadout config. Sent with the "handshake" request; plugins
+// that take no settings can ignore it.
+type HandshakeParams struct {
+	Settings map[string]string `json:"settings,omitempty"`
+}
+
 // HandshakeResult is returned by the "handshake" method.
 type HandshakeResult struct {
 	Name         string   `json:"name"`

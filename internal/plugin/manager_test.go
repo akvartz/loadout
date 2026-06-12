@@ -175,6 +175,32 @@ func TestApplyConversionSkipsConverterWithWrongResultCount(t *testing.T) {
 	}
 }
 
+func TestApplyConversionKeepsSiblingNamespaces(t *testing.T) {
+	// A converter that knows brew "docker" also exists as a cask. Without
+	// keep, a brew->brew-cask pass would move it out of the formula list.
+	conv := &fakeConverter{
+		name: "fake",
+		table: map[string]map[string]map[string]string{
+			"brew": {"brew-cask": {"docker": "docker"}},
+			"snap": {"brew-cask": {"spotify": "spotify"}},
+		},
+	}
+	m := &Manager{convs: []Converter{conv}}
+	s := stateWith(map[string][]string{
+		"brew": {"docker"},
+		"snap": {"spotify"},
+	})
+
+	out := m.ApplyConversion(s, "brew-cask", "brew", "brew-cask")
+
+	if got, want := out.Sources["brew"].Packages, []string{"docker"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("kept brew packages = %v, want %v", got, want)
+	}
+	if got, want := out.Sources["brew-cask"].Packages, []string{"spotify"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("brew-cask packages = %v, want %v", got, want)
+	}
+}
+
 func TestApplyConversionDeterministicAcrossSources(t *testing.T) {
 	conv := &fakeConverter{
 		name: "multi",

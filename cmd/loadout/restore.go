@@ -71,7 +71,7 @@ func runRestore(_ *cobra.Command, _ []string) error {
 			fmt.Fprintln(os.Stderr, `warning: conversion requested but no converters are enabled — add one to plugins.enabled in the config (e.g. "converter")`)
 		default:
 			for _, ns := range namespaces {
-				s = mgr.ApplyConversion(s, ns)
+				s = mgr.ApplyConversion(s, ns, namespaces...)
 			}
 		}
 	}

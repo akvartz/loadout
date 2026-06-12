@@ -19,9 +19,10 @@ type Client struct {
 	nextID int64
 }
 
-// Start spawns the plugin binary, performs the handshake, and returns the
-// client and the plugin's self-reported capabilities.
-func Start(binary string) (*Client, HandshakeResult, error) {
+// Start spawns the plugin binary, performs the handshake (passing the
+// plugin's settings from the config), and returns the client and the
+// plugin's self-reported capabilities.
+func Start(binary string, settings map[string]string) (*Client, HandshakeResult, error) {
 	cmd := exec.Command(binary)
 
 	stdin, err := cmd.StdinPipe()
@@ -45,7 +46,7 @@ func Start(binary string) (*Client, HandshakeResult, error) {
 	}
 
 	var hs HandshakeResult
-	if err := c.Call("handshake", nil, &hs); err != nil {
+	if err := c.Call("handshake", HandshakeParams{Settings: settings}, &hs); err != nil {
 		cmd.Process.Kill() //nolint:errcheck
 		return nil, HandshakeResult{}, fmt.Errorf("handshake with %s: %w", binary, err)
 	}

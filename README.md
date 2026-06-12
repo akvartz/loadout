@@ -113,7 +113,7 @@ Conversion is plugin-based and nothing is enabled by default. Enable the built-i
 enabled = ["converter"]
 ```
 
-The built-in converter ships a curated table of common CLI tools and desktop apps keyed by canonical identity, so any manager pair converts in both directions: `apt`, `brew`, `nix`, `snap`, `flatpak`, `pip`, `cargo`, and `npm`. brew translations cover formulas only — GUI apps that would need a cask are left as comments.
+The built-in converter ships a curated table of common CLI tools and desktop apps keyed by canonical identity, so any manager pair converts in both directions: `apt`, `brew`, `brew-cask`, `nix`, `snap`, `flatpak`, `pip`, `cargo`, and `npm`. The `brewfile` target converts in two passes — formulas first, then casks — so flatpak/snap GUI apps come out as `cask "gimp"` entries.
 
 ### Switch distros with `--convert-to`
 
@@ -182,7 +182,8 @@ loadout restore --file ~/dotfiles/loadout.toml --target nix
 | `cargo` | `~/.cargo/.crates2.json` |
 | `npm` | `npm list -g --depth=0 --json` |
 | `appimage` | scans `~/Applications` and `~/.local/share/applications` |
-| `brew` | `brew list --formula --casks` |
+| `brew` | `brew list --formula` |
+| `brew-cask` | `brew list --cask` |
 | `nix` | `nix-env --query --installed` |
 
 Managers not present on the system are silently skipped.
@@ -238,17 +239,42 @@ loadout plugins list
 
 ### Built-in plugins
 
-- **`converter`** — canonical name-translation table (~200 packages) across apt, brew, nix, snap, flatpak, pip, cargo, and npm, extensible via a user table. Powers `restore --convert` and `--convert-to`.
+- **`converter`** — canonical name-translation table (~200 packages) across apt, brew, brew-cask, nix, snap, flatpak, pip, cargo, and npm, extensible via a user table. Powers `restore --convert` and `--convert-to`.
 - **`cloud`** — copies the state file to a configured `destination` after each snapshot.
+
+### The Repology converter plugin
+
+For names beyond the curated table, `loadout-plugin-repology` resolves packages through the [Repology](https://repology.org) database, which indexes most package repositories. Converters run in order — the fast built-in table first, Repology for whatever it missed — so enable both:
+
+```sh
+go install github.com/akvartz/loadout/cmd/loadout-plugin-repology@latest
+```
+
+```toml
+[plugins]
+enabled = ["converter", "repology"]
+```
+
+It supports converting between `apt`, `brew`, `brew-cask`, and `nix` (the managers Repology indexes by those names). Results are best-effort: Repology projects occasionally group or name packages differently from what the target manager expects.
+
+Settings (all optional), under `[plugin.repology]`:
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `cache` | `~/.cache/loadout/repology.json` | Lookup cache path (`"off"` to disable) |
+| `cache_ttl` | `168h` | How long cached results stay valid |
+| `min_interval` | `1s` | Minimum delay between API requests (please be polite to Repology) |
+| `base_url` | `https://repology.org` | API endpoint override |
+
+Lookups are rate-limited and cached (including misses), but the first conversion of a large snapshot will take a while — about a second per uncached package. Don't combine it with the built-in converter's `fallback = "identity"`, which claims every name before Repology gets a chance.
 
 ### External plugins
 
-Any executable named `loadout-plugin-<name>` on your `PATH` is discovered automatically (it still must be listed in `plugins.enabled` to run). loadout starts it as a subprocess and speaks JSON-RPC 2.0 over stdin/stdout: first a `handshake` call returns the plugin's name, version, and capabilities, then capability-specific methods follow (`detector.detect`, `generator.generate`, `converter.convert`, `hook.pre_restore`, ...). The wire types live in [`internal/plugin/rpc/wire.go`](internal/plugin/rpc/wire.go) and are dependency-free so plugin authors can copy them.
+Any executable named `loadout-plugin-<name>` on your `PATH` is discovered automatically (it still must be listed in `plugins.enabled` to run). loadout starts it as a subprocess and speaks JSON-RPC 2.0 over stdin/stdout: a `handshake` call delivers the plugin's `[plugin.<name>]` settings and returns its name, version, and capabilities, then capability-specific methods follow (`detector.detect`, `generator.generate`, `converter.convert`, `hook.pre_restore`, ...). The wire types live in [`internal/plugin/rpc/wire.go`](internal/plugin/rpc/wire.go) and are dependency-free so plugin authors can copy them; [`cmd/loadout-plugin-repology`](cmd/loadout-plugin-repology) is a complete worked example.
 
 ## Roadmap
 
-- **Database-backed translation** — an external converter plugin backed by a real package database (e.g. Repology) for coverage beyond the curated table
-- **Brew cask support** — translate GUI apps (flatpak/snap) into `cask` entries in Brewfile output
+- **More package managers** — dnf and pacman detectors, and their namespaces in the conversion table
 
 ## License
 

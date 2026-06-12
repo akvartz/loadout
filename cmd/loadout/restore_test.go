@@ -40,8 +40,9 @@ func TestConvertedRestoreToBrewfile(t *testing.T) {
 	s.Sources["flatpak"] = state.SourceState{Packages: []string{"org.gimp.GIMP"}}
 	s.Sources["snap"] = state.SourceState{Packages: []string{"spotify"}}
 
-	for _, ns := range conversionManagers("brewfile") {
-		s = mgr.ApplyConversion(s, ns)
+	namespaces := conversionManagers("brewfile")
+	for _, ns := range namespaces {
+		s = mgr.ApplyConversion(s, ns, namespaces...)
 	}
 
 	gen, err := resolveGenerator("brewfile", mgr)
