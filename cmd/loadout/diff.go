@@ -1,7 +1,6 @@
 package loadout
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -39,25 +38,7 @@ func runDiff(cmd *cobra.Command, _ []string) error {
 	defer mgr.Close() //nolint:errcheck
 
 	detectors := append(detector.All(), bridgeDetectors(mgr.Detectors())...)
-	current := state.New()
-
-	for _, d := range detectors {
-		pkgs, err := d.Detect()
-		if errors.Is(err, detector.ErrNotAvailable) {
-			continue
-		}
-		if err != nil {
-			if verbose {
-				fmt.Fprintf(os.Stderr, "%s: error: %v\n", d.Name(), err)
-			}
-			continue
-		}
-		names := make([]string, len(pkgs))
-		for i, p := range pkgs {
-			names[i] = p.Name
-		}
-		current.Sources[d.Name()] = state.SourceState{Packages: names}
-	}
+	current := detectCurrentState(detectors)
 
 	diffs := diff.Compute(saved, current)
 	diff.Render(diffs, cmd.OutOrStdout())

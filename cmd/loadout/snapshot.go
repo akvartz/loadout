@@ -33,6 +33,24 @@ func runSnapshot(cmd *cobra.Command, _ []string) error {
 	defer mgr.Close() //nolint:errcheck
 
 	detectors := append(detector.All(), bridgeDetectors(mgr.Detectors())...)
+	s := detectCurrentState(detectors)
+
+	if err := state.Write(stateFile, s); err != nil {
+		return fmt.Errorf("writing state: %w", err)
+	}
+	fmt.Fprintf(cmd.OutOrStdout(), "saved to %s\n", stateFile)
+
+	// Run post-snapshot hooks. Errors are non-fatal.
+	for _, h := range mgr.Hooks() {
+		if err := h.PostSnapshot(s, stateFile); err != nil {
+			fmt.Fprintf(os.Stderr, "hook %s: PostSnapshot: %v\n", h.Name(), err)
+		}
+	}
+
+	return nil
+}
+
+func detectCurrentState(detectors []detector.Detector) state.State {
 	s := state.New()
 
 	for _, d := range detectors {
@@ -60,17 +78,5 @@ func runSnapshot(cmd *cobra.Command, _ []string) error {
 		}
 	}
 
-	if err := state.Write(stateFile, s); err != nil {
-		return fmt.Errorf("writing state: %w", err)
-	}
-	fmt.Fprintf(cmd.OutOrStdout(), "saved to %s\n", stateFile)
-
-	// Run post-snapshot hooks. Errors are non-fatal.
-	for _, h := range mgr.Hooks() {
-		if err := h.PostSnapshot(s, stateFile); err != nil {
-			fmt.Fprintf(os.Stderr, "hook %s: PostSnapshot: %v\n", h.Name(), err)
-		}
-	}
-
-	return nil
+	return s
 }
