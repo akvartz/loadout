@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/akvartz/loadout/internal/config"
 	"github.com/akvartz/loadout/internal/plugin/rpc"
 )
 
@@ -103,7 +104,7 @@ func newConverter(settings map[string]string) (*converter, error) {
 			path = filepath.Join(dir, "loadout", "repology.json")
 		}
 	default:
-		path = expandTilde(path)
+		path = config.ExpandTilde(path)
 	}
 	c.cache = loadCache(path, ttl)
 	return c, nil
@@ -216,15 +217,4 @@ func (c *converter) throttle() {
 		time.Sleep(wait)
 	}
 	c.lastReq = time.Now()
-}
-
-func expandTilde(s string) string {
-	if !strings.HasPrefix(s, "~") {
-		return s
-	}
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return s
-	}
-	return filepath.Join(home, s[1:])
 }
