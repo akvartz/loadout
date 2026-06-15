@@ -61,9 +61,9 @@ func (c *cache) save() {
 	if err != nil {
 		return
 	}
-	if err := os.MkdirAll(filepath.Dir(c.path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(c.path), 0o700); err != nil {
 		return
 	}
-	_ = os.WriteFile(c.path, data, 0o644)
+	_ = os.WriteFile(c.path, data, 0o600)
 	c.dirty = false
 }
