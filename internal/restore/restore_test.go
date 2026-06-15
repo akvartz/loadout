@@ -19,8 +19,14 @@ func TestShellGenerate(t *testing.T) {
 	script, err := NewShell().Generate(stateWith(map[string][]string{
 		"apt":       {"curl", "git"},
 		"flatpak":   {"org.signal.Signal"},
+		"snap":      {"code"},
+		"pip":       {"httpie"},
 		"cargo":     {"ripgrep"},
+		"npm":       {"prettier"},
+		"brew":      {"jq"},
 		"brew-cask": {"firefox"},
+		"nix":       {"fzf"},
+		"appimage":  {"Neovim.appimage"},
 	}))
 	if err != nil {
 		t.Fatal(err)
@@ -31,8 +37,14 @@ func TestShellGenerate(t *testing.T) {
 		"set -e",
 		"sudo apt-get install -y curl git",
 		"flatpak install -y flathub org.signal.Signal",
+		"sudo snap install code",
+		"pip install --user httpie",
 		"cargo install ripgrep",
+		"npm install -g prettier",
+		"brew install jq",
 		"brew install --cask firefox",
+		"nix-env -iA fzf",
+		"#   Neovim.appimage",
 	} {
 		if !strings.Contains(script, want) {
 			t.Errorf("script missing %q:\n%s", want, script)
@@ -89,6 +101,21 @@ func TestGeneratorsHandleEmptyState(t *testing.T) {
 	for _, gen := range []Generator{NewShell(), NewBrewfile(), NewNix()} {
 		if _, err := gen.Generate(state.New()); err != nil {
 			t.Errorf("%s: Generate(empty) returned error: %v", gen.Name(), err)
+		}
+	}
+}
+
+func TestGeneratorNames(t *testing.T) {
+	for _, tc := range []struct {
+		gen  Generator
+		name string
+	}{
+		{NewShell(), "shell"},
+		{NewBrewfile(), "brewfile"},
+		{NewNix(), "nix"},
+	} {
+		if tc.gen.Name() != tc.name {
+			t.Errorf("expected generator name %q, got %q", tc.name, tc.gen.Name())
 		}
 	}
 }
