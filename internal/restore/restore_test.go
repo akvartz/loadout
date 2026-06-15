@@ -64,7 +64,6 @@ func TestBrewfileGenerate(t *testing.T) {
 	}
 }
 
-
 func TestGeneratorsHandleEmptyState(t *testing.T) {
 	for _, gen := range []Generator{NewShell(), NewBrewfile(), NewNix()} {
 		if _, err := gen.Generate(state.New()); err != nil {
