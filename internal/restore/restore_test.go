@@ -40,7 +40,6 @@ func TestShellGenerate(t *testing.T) {
 	}
 }
 
-
 func TestNixGenerate(t *testing.T) {
 	script, err := NewNix().Generate(stateWith(map[string][]string{
 		"nix": {"fd", "htop"},
