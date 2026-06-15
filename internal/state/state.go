@@ -49,7 +49,7 @@ func Read(path string) (State, error) {
 }
 
 func Write(path string, s State) error {
-	f, err := os.Create(path)
+	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}

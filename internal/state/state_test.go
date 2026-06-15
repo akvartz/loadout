@@ -1,8 +1,10 @@
 package state
 
 import (
+	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"testing"
 )
 
@@ -49,5 +51,27 @@ func TestReadInitializesNilSources(t *testing.T) {
 	}
 	if got.Sources == nil {
 		t.Error("Read should initialize a nil Sources map")
+	}
+}
+
+func TestWritePermissions(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping permission check on Windows")
+	}
+
+	path := filepath.Join(t.TempDir(), "loadout_perms.toml")
+	s := New()
+
+	if err := Write(path, s); err != nil {
+		t.Fatal(err)
+	}
+
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if info.Mode().Perm() != 0600 {
+		t.Errorf("file mode = %v, want 0600", info.Mode().Perm())
 	}
 }
