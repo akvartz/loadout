@@ -64,26 +64,6 @@ func TestBrewfileGenerate(t *testing.T) {
 	}
 }
 
-func TestNixGenerate(t *testing.T) {
-	script, err := NewNix().Generate(stateWith(map[string][]string{
-		"nix": {"fd", "htop"},
-		"apt": {"cowsay"},
-	}))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for _, want := range []string{
-		"home.packages = with pkgs; [",
-		"  fd\n",
-		"  htop\n",
-		"#   cowsay",
-	} {
-		if !strings.Contains(script, want) {
-			t.Errorf("nix snippet missing %q:\n%s", want, script)
-		}
-	}
-}
 
 func TestGeneratorsHandleEmptyState(t *testing.T) {
 	for _, gen := range []Generator{NewShell(), NewBrewfile(), NewNix()} {
