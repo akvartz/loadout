@@ -1,6 +1,7 @@
 package state
 
 import (
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -49,5 +50,43 @@ func TestReadInitializesNilSources(t *testing.T) {
 	}
 	if got.Sources == nil {
 		t.Error("Read should initialize a nil Sources map")
+	}
+}
+
+func TestWriteError(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "nonexistent_dir", "loadout.toml")
+	if err := Write(path, State{}); err == nil {
+		t.Error("Write to non-existent directory should return an error")
+	}
+}
+
+func TestReadInvalidData(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "invalid.toml")
+	if err := os.WriteFile(path, []byte("invalid \n toml \n content"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Read(path); err == nil {
+		t.Error("Read of invalid TOML file should return an error")
+	}
+}
+
+func TestWriteSuccess(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "success.toml")
+	err := Write(path, New())
+	if err != nil {
+		t.Errorf("Write failed: %v", err)
+	}
+}
+
+func TestReadSuccess(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "success.toml")
+	err := Write(path, New())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = Read(path)
+	if err != nil {
+		t.Errorf("Read failed: %v", err)
 	}
 }
