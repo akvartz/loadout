@@ -18,6 +18,8 @@ func stateWith(sources map[string][]string) state.State {
 func TestShellGenerate(t *testing.T) {
 	script, err := NewShell().Generate(stateWith(map[string][]string{
 		"apt":       {"curl", "git"},
+		"dnf":       {"htop"},
+		"pacman":    {"fzf", "bat"},
 		"flatpak":   {"org.signal.Signal"},
 		"cargo":     {"ripgrep"},
 		"brew-cask": {"firefox"},
@@ -30,6 +32,8 @@ func TestShellGenerate(t *testing.T) {
 		"#!/usr/bin/env sh",
 		"set -e",
 		"sudo apt-get install -y curl git",
+		"sudo dnf install -y htop",
+		"sudo pacman -S --needed --noconfirm fzf bat",
 		"flatpak install -y flathub org.signal.Signal",
 		"cargo install ripgrep",
 		"brew install --cask firefox",

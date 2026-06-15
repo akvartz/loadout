@@ -20,6 +20,8 @@ const userAgent = "loadout-plugin-repology/" + version + " (+https://github.com/
 // resolve a package name to a Repology project. Tried in order.
 var fromRepos = map[string][]string{
 	"apt":       {"debian_13", "ubuntu_24_04"},
+	"dnf":       {"fedora_rawhide"},
+	"pacman":    {"arch"},
 	"brew":      {"homebrew"},
 	"brew-cask": {"homebrew_casks"},
 	"nix":       {"nix_unstable"},
@@ -30,6 +32,10 @@ func repoMatches(manager, repo string) bool {
 	switch manager {
 	case "apt":
 		return strings.HasPrefix(repo, "debian_") || strings.HasPrefix(repo, "ubuntu_")
+	case "dnf":
+		return strings.HasPrefix(repo, "fedora_")
+	case "pacman":
+		return repo == "arch"
 	case "brew":
 		return repo == "homebrew"
 	case "brew-cask":

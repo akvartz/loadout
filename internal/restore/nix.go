@@ -30,7 +30,7 @@ func (n *Nix) Generate(st state.State) (string, error) {
 
 	b.WriteString("];\n\n")
 
-	unsupported := []string{"apt", "flatpak", "snap", "pip", "cargo", "npm", "brew", "brew-cask", "appimage"}
+	unsupported := []string{"apt", "dnf", "pacman", "flatpak", "snap", "pip", "cargo", "npm", "brew", "brew-cask", "appimage"}
 	for _, src := range unsupported {
 		pkgs := st.Sources[src].Packages
 		if len(pkgs) == 0 {

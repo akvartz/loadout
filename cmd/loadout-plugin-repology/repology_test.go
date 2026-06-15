@@ -36,6 +36,8 @@ func (f *fakeRepology) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 const fdProject = `[
 	{"repo": "debian_13", "binname": "fd-find", "srcname": "rust-fd-find", "status": "newest"},
 	{"repo": "ubuntu_24_04", "binname": "fd-find", "status": "outdated"},
+	{"repo": "fedora_rawhide", "binname": "fd-find", "status": "newest"},
+	{"repo": "arch", "binname": "fd", "status": "newest"},
 	{"repo": "homebrew", "srcname": "fd", "status": "newest"},
 	{"repo": "nix_unstable", "srcname": "fd", "status": "newest"},
 	{"repo": "freebsd", "srcname": "sysutils/fd", "status": "newest"}
@@ -65,8 +67,10 @@ func testConverter(t *testing.T, srv *httptest.Server, extra map[string]string) 
 
 func TestLookupTranslates(t *testing.T) {
 	fake := &fakeRepology{projects: map[string]string{
-		"debian_13|binname|fd-find": fdProject,
-		"homebrew|srcname|fd":       fdProject,
+		"debian_13|binname|fd-find":      fdProject,
+		"homebrew|srcname|fd":            fdProject,
+		"fedora_rawhide|binname|fd-find": fdProject,
+		"arch|binname|fd":                fdProject,
 	}}
 	srv := httptest.NewServer(fake)
 	defer srv.Close()
@@ -76,6 +80,9 @@ func TestLookupTranslates(t *testing.T) {
 		{"apt", "brew", "fd-find", "fd"},
 		{"apt", "nix", "fd-find", "fd"},
 		{"brew", "apt", "fd", "fd-find"},
+		{"dnf", "pacman", "fd-find", "fd"},
+		{"pacman", "dnf", "fd", "fd-find"},
+		{"apt", "pacman", "fd-find", "fd"},
 	}
 	for _, tc := range cases {
 		got, found, err := c.lookup(tc.from, tc.to, tc.pkg)

@@ -20,6 +20,8 @@ type Detector interface {
 func All() []Detector {
 	return []Detector{
 		&Apt{},
+		&Dnf{},
+		&Pacman{},
 		&Flatpak{},
 		&Snap{},
 		&Pip{},
