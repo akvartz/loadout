@@ -113,7 +113,7 @@ Conversion is plugin-based and nothing is enabled by default. Enable the built-i
 enabled = ["converter"]
 ```
 
-The built-in converter ships a curated table of common CLI tools and desktop apps keyed by canonical identity, so any manager pair converts in both directions: `apt`, `brew`, `brew-cask`, `nix`, `snap`, `flatpak`, `pip`, `cargo`, and `npm`. The `brewfile` target converts in two passes — formulas first, then casks — so flatpak/snap GUI apps come out as `cask "gimp"` entries.
+The built-in converter ships a curated table of common CLI tools and desktop apps keyed by canonical identity, so any manager pair converts in both directions: `apt`, `dnf`, `pacman`, `brew`, `brew-cask`, `nix`, `snap`, `flatpak`, `pip`, `cargo`, and `npm`. The `brewfile` target converts in two passes — formulas first, then casks — so flatpak/snap GUI apps come out as `cask "gimp"` entries.
 
 ### Switch distros with `--convert-to`
 
@@ -176,6 +176,8 @@ loadout restore --file ~/dotfiles/loadout.toml --target nix
 | Source | Detection method |
 |---|---|
 | `apt` | `apt-mark showmanual` |
+| `dnf` | `dnf repoquery --userinstalled` |
+| `pacman` | `pacman -Qqe` |
 | `flatpak` | `flatpak list --app` |
 | `snap` | `snap list` |
 | `pip` | `pip list --user --format=json` |
@@ -239,7 +241,7 @@ loadout plugins list
 
 ### Built-in plugins
 
-- **`converter`** — canonical name-translation table (~200 packages) across apt, brew, brew-cask, nix, snap, flatpak, pip, cargo, and npm, extensible via a user table. Powers `restore --convert` and `--convert-to`.
+- **`converter`** — canonical name-translation table (~200 packages) across apt, dnf, pacman, brew, brew-cask, nix, snap, flatpak, pip, cargo, and npm, extensible via a user table. Powers `restore --convert` and `--convert-to`.
 - **`cloud`** — copies the state file to a configured `destination` after each snapshot.
 
 ### The Repology converter plugin
@@ -255,7 +257,7 @@ go install github.com/akvartz/loadout/cmd/loadout-plugin-repology@latest
 enabled = ["converter", "repology"]
 ```
 
-It supports converting between `apt`, `brew`, `brew-cask`, and `nix` (the managers Repology indexes by those names). Results are best-effort: Repology projects occasionally group or name packages differently from what the target manager expects.
+It supports converting between `apt`, `dnf`, `pacman`, `brew`, `brew-cask`, and `nix` (the managers Repology indexes). Results are best-effort: Repology projects occasionally group or name packages differently from what the target manager expects.
 
 Settings (all optional), under `[plugin.repology]`:
 
@@ -274,7 +276,7 @@ Any executable named `loadout-plugin-<name>` on your `PATH` is discovered automa
 
 ## Roadmap
 
-- **More package managers** — dnf and pacman detectors, and their namespaces in the conversion table
+- **Version pinning** — record package versions in the snapshot and optionally restore exact versions where the manager supports it
 
 ## License
 

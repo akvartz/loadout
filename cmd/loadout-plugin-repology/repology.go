@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/akvartz/loadout/internal/config"
 	"github.com/akvartz/loadout/internal/plugin/rpc"
 )
 
@@ -19,6 +20,8 @@ const userAgent = "loadout-plugin-repology/" + version + " (+https://github.com/
 // resolve a package name to a Repology project. Tried in order.
 var fromRepos = map[string][]string{
 	"apt":       {"debian_13", "ubuntu_24_04"},
+	"dnf":       {"fedora_rawhide"},
+	"pacman":    {"arch"},
 	"brew":      {"homebrew"},
 	"brew-cask": {"homebrew_casks"},
 	"nix":       {"nix_unstable"},
@@ -29,6 +32,10 @@ func repoMatches(manager, repo string) bool {
 	switch manager {
 	case "apt":
 		return strings.HasPrefix(repo, "debian_") || strings.HasPrefix(repo, "ubuntu_")
+	case "dnf":
+		return strings.HasPrefix(repo, "fedora_")
+	case "pacman":
+		return repo == "arch"
 	case "brew":
 		return repo == "homebrew"
 	case "brew-cask":
@@ -103,7 +110,7 @@ func newConverter(settings map[string]string) (*converter, error) {
 			path = filepath.Join(dir, "loadout", "repology.json")
 		}
 	default:
-		path = expandTilde(path)
+		path = config.ExpandTilde(path)
 	}
 	c.cache = loadCache(path, ttl)
 	return c, nil
@@ -216,15 +223,4 @@ func (c *converter) throttle() {
 		time.Sleep(wait)
 	}
 	c.lastReq = time.Now()
-}
-
-func expandTilde(s string) string {
-	if !strings.HasPrefix(s, "~") {
-		return s
-	}
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return s
-	}
-	return filepath.Join(home, s[1:])
 }

@@ -29,7 +29,7 @@ type Cloud struct {
 func (c *Cloud) Name() string { return "cloud" }
 
 func (c *Cloud) PostSnapshot(s state.State, stateFile string) error {
-	if err := os.MkdirAll(filepath.Dir(c.destination), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(c.destination), 0o700); err != nil {
 		return fmt.Errorf("cloud: create destination dir: %w", err)
 	}
 	return copyFile(stateFile, c.destination)
@@ -45,7 +45,7 @@ func copyFile(src, dst string) error {
 	}
 	defer in.Close()
 
-	out, err := os.Create(dst)
+	out, err := os.OpenFile(dst, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
