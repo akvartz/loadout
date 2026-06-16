@@ -116,6 +116,15 @@ func TestBuiltinTable(t *testing.T) {
 		{"pip", "yt-dlp", "brew", "yt-dlp"},
 		{"cargo", "watchexec-cli", "brew", "watchexec"},
 		{"npm", "typescript", "apt", "node-typescript"},
+		{"apt", "fd-find", "pacman", "fd"},
+		{"apt", "silversearcher-ag", "dnf", "the_silver_searcher"},
+		{"dnf", "vim-enhanced", "apt", "vim"},
+		{"dnf", "moby-engine", "pacman", "docker"},
+		{"pacman", "github-cli", "brew", "gh"},
+		{"pacman", "aws-cli", "nix", "awscli2"},
+		{"brew", "the_silver_searcher", "pacman", "the_silver_searcher"},
+		{"flatpak", "org.gimp.GIMP", "dnf", "gimp"},
+		{"snap", "code", "pacman", "code"},
 	}
 	for _, tc := range cases {
 		got, ok := tbl.Lookup(tc.from, tc.name, tc.to)

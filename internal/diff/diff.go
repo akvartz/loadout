@@ -70,7 +70,7 @@ func toSet(pkgs []string) map[string]bool {
 }
 
 func unionKeys(a, b map[string]state.SourceState) []string {
-	seen := make(map[string]bool)
+	seen := make(map[string]bool, len(a)+len(b))
 	for k := range a {
 		seen[k] = true
 	}

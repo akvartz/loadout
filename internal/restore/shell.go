@@ -21,6 +21,14 @@ func (s *Shell) Generate(st state.State) (string, error) {
 		fmt.Fprintf(&b, "# apt\nsudo apt-get install -y %s\n\n", strings.Join(pkgs, " "))
 	}
 
+	if pkgs := st.Sources["dnf"].Packages; len(pkgs) > 0 {
+		fmt.Fprintf(&b, "# dnf\nsudo dnf install -y %s\n\n", strings.Join(pkgs, " "))
+	}
+
+	if pkgs := st.Sources["pacman"].Packages; len(pkgs) > 0 {
+		fmt.Fprintf(&b, "# pacman\nsudo pacman -S --needed --noconfirm %s\n\n", strings.Join(pkgs, " "))
+	}
+
 	if pkgs := st.Sources["flatpak"].Packages; len(pkgs) > 0 {
 		b.WriteString("# flatpak\n")
 		for _, p := range pkgs {

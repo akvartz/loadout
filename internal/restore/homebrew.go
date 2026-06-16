@@ -31,7 +31,7 @@ func (bf *Brewfile) Generate(st state.State) (string, error) {
 		b.WriteString("\n")
 	}
 
-	unsupported := []string{"apt", "flatpak", "snap", "pip", "cargo", "npm", "appimage", "nix"}
+	unsupported := []string{"apt", "dnf", "pacman", "flatpak", "snap", "pip", "cargo", "npm", "appimage", "nix"}
 	for _, src := range unsupported {
 		pkgs := st.Sources[src].Packages
 		if len(pkgs) == 0 {

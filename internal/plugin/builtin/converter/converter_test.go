@@ -106,8 +106,8 @@ func TestConvertSnapAndFlatpak(t *testing.T) {
 func TestConvertUnknownManagers(t *testing.T) {
 	c := newConverter(t, nil)
 	for _, req := range []plugin.ConvertRequest{
-		{From: "pacman", To: "nix", Packages: []string{"htop"}},
-		{From: "apt", To: "pacman", Packages: []string{"some-unknown-pkg"}},
+		{From: "chocolatey", To: "nix", Packages: []string{"htop"}},
+		{From: "apt", To: "chocolatey", Packages: []string{"some-unknown-pkg"}},
 	} {
 		results, err := c.Convert(req)
 		if err != nil {
