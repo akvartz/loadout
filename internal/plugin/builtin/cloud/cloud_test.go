@@ -8,6 +8,31 @@ import (
 	"github.com/akvartz/loadout/internal/state"
 )
 
+func TestCopyFile(t *testing.T) {
+	tempDir := t.TempDir()
+	src := filepath.Join(tempDir, "src.txt")
+	dst := filepath.Join(tempDir, "dst.txt")
+
+	err := os.WriteFile(src, []byte("test data"), 0644)
+	if err != nil {
+		t.Fatalf("failed to create source file: %v", err)
+	}
+
+	err = copyFile(src, dst)
+	if err != nil {
+		t.Fatalf("copyFile failed: %v", err)
+	}
+
+	info, err := os.Stat(dst)
+	if err != nil {
+		t.Fatalf("failed to stat destination file: %v", err)
+	}
+
+	if info.Mode().Perm() != 0600 {
+		t.Errorf("expected permissions 0600, got %v", info.Mode().Perm())
+	}
+}
+
 func TestCloud_PostSnapshot_CreatesDirWithSecurePermissions(t *testing.T) {
 	tempDir := t.TempDir()
 	destDir := filepath.Join(tempDir, "backup_dest")
@@ -33,18 +58,10 @@ func TestCloud_PostSnapshot_CreatesDirWithSecurePermissions(t *testing.T) {
 		t.Fatalf("failed to stat destination directory: %v", err)
 	}
 
-	// We only care about the permission bits
+	// MkdirAll applies the umask, so the result can only be 0700 or stricter.
 	perms := info.Mode().Perm()
 	expectedPerms := os.FileMode(0700)
-
-	// Under umask, the actual permissions might be more restrictive than 0700 (e.g. 0700 & ~umask == 0700),
-	// but let's check it's exactly 0700 for this test or bounded by it.
-	// Actually os.MkdirAll applies umask, but if we set 0700, umask can only make it stricter.
-	// Typically, umask is 0022 or 0002. So 0700 & ~0022 = 0700.
-	// If umask is 0077, 0700 & ~0077 = 0700 still (except read/write for owner but we are creating it). Wait, 0700 & ~0077 is 0700 & 0700 = 0700.
-	// It's just bounded by 0700.
 	if perms != expectedPerms {
-		// Just to be safe, check that group and other have no permissions
 		if perms&0077 != 0 {
 			t.Errorf("destination directory has insecure permissions: %v (expected %v or more restrictive)", perms, expectedPerms)
 		}
