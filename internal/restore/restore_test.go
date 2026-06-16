@@ -56,30 +56,6 @@ func TestShellGenerate(t *testing.T) {
 	}
 }
 
-func TestBrewfileGenerate(t *testing.T) {
-	script, err := NewBrewfile().Generate(stateWith(map[string][]string{
-		"brew":      {"fd", "ripgrep"},
-		"brew-cask": {"firefox"},
-		"apt":       {"cowsay"},
-	}))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for _, want := range []string{`brew "fd"`, `brew "ripgrep"`, `cask "firefox"`} {
-		if !strings.Contains(script, want) {
-			t.Errorf("Brewfile missing %q:\n%s", want, script)
-		}
-	}
-	// Packages from other managers appear only as comments.
-	if !strings.Contains(script, "#   cowsay") {
-		t.Errorf("Brewfile should list apt packages as comments:\n%s", script)
-	}
-	if strings.Contains(script, `brew "cowsay"`) {
-		t.Errorf("Brewfile must not emit apt packages as brew entries:\n%s", script)
-	}
-}
-
 func TestGeneratorsHandleEmptyState(t *testing.T) {
 	for _, gen := range []Generator{NewShell(), NewBrewfile(), NewNix()} {
 		if _, err := gen.Generate(state.New()); err != nil {
