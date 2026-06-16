@@ -5,33 +5,37 @@ import (
 	"os/exec"
 )
 
-type Pip struct{}
+type Pip struct {
+	binPath string
+	checked bool
+}
 
 func (p *Pip) Name() string { return "pip" }
 
 func (p *Pip) Available() bool {
-	for _, bin := range []string{"pip3", "pip"} {
-		if _, err := exec.LookPath(bin); err == nil {
-			return true
-		}
-	}
-	return false
+	return p.binary() != ""
 }
 
 func (p *Pip) binary() string {
+	if p.checked {
+		return p.binPath
+	}
+	p.checked = true
 	for _, bin := range []string{"pip3", "pip"} {
-		if _, err := exec.LookPath(bin); err == nil {
-			return bin
+		if path, err := exec.LookPath(bin); err == nil {
+			p.binPath = path
+			return path
 		}
 	}
 	return ""
 }
 
 func (p *Pip) Detect() ([]Package, error) {
-	if !p.Available() {
+	bin := p.binary()
+	if bin == "" {
 		return nil, ErrNotAvailable
 	}
-	out, err := exec.Command(p.binary(), "list", "--user", "--format=json").Output()
+	out, err := exec.Command(bin, "list", "--user", "--format=json").Output()
 	if err != nil {
 		return nil, err
 	}

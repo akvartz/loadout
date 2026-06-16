@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"testing"
 )
 
@@ -88,5 +89,27 @@ func TestReadSuccess(t *testing.T) {
 	_, err = Read(path)
 	if err != nil {
 		t.Errorf("Read failed: %v", err)
+	}
+}
+
+func TestWritePermissions(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping permission check on Windows")
+	}
+
+	path := filepath.Join(t.TempDir(), "loadout_perms.toml")
+	s := New()
+
+	if err := Write(path, s); err != nil {
+		t.Fatal(err)
+	}
+
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if info.Mode().Perm() != 0600 {
+		t.Errorf("file mode = %v, want 0600", info.Mode().Perm())
 	}
 }
